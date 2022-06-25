@@ -152,14 +152,14 @@ class ProductController extends Controller
         foreach($parentCates as $pcate){
 
             $spcate = str_replace(' ', '', $pcate->name);
-            if(!$request->{$spcate.'All'}) {
+            if(!$request->{'All'.$spcate}) {
                 $childCates = Category::where('category_id', $pcate->id)->get();
                 $search_query = $search_query->whereHas("categories" , function ($q) use ($childCates, $request) {
                     $cateNeeded = [];
                     foreach($childCates as $ccate)
                     {
                         $sccate = str_replace(' ', '', $ccate->name);
-                        if($request->{$sccate})
+                        if($request->{'Cate'.$sccate})
                         {
                             array_push($cateNeeded, $ccate->name);
                         }
@@ -181,23 +181,12 @@ class ProductController extends Controller
             $items = $items->sortByDesc('price');
         }
 
-        $categoriesRaw = Category::all();
-
-        $categories = [];
-        foreach($categoriesRaw as $cate)
+        foreach($items as $item)
         {
-            if($cate->category_id!=null)
-            {
-                $parent = Category::firstWhere("id", "=", $cate->category_id);
-                if(!array_key_exists($parent->name, $categories))
-                {
-                    $categories[$parent->name] = [];
-                }
-                array_push($categories[$parent->name], $cate->name);
-            }
+            Log::info($item->name);
         }
 
-        return view('listing', ['items' => $items, 'categories' => $categories]);
+        return response()->json(['items' => $items->toArray()]);
     }
         /**
      * Show the form for creating a new resource.

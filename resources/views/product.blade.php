@@ -158,8 +158,7 @@
                     @foreach($answers[$inq->id] as $ans)
                         <div style="margin-left: 20vw">
                             <small style="color: grey;">Abilde: {{$ans->updated_at}}</small><br>
-                            <div style="width : 25vw; word-wrap: break-word">
-                                {{$ans->ans}}
+                            <div style="width : 25vw; word-wrap: break-wor{{$ans->ans}}
                             </div>
                         </div>
                     @endforeach
