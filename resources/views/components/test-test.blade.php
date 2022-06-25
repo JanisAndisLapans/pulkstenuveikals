@@ -1,0 +1,3 @@
+<div>
+    test {{$number}}
+</div>
