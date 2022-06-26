@@ -16,5 +16,9 @@
     <div class="container d-flex flex-column flex-md-row justify-content-between">
         <a class="py-2 d-none d-md-inline-block" href="/">Preces</a>
         <a class="py-2 d-none d-md-inline-block" href="/cart">Grozs</a>
+        @can("can_administrate")
+            <a style="color:red" class="py-2 d-none d-md-inline-block" href="/admin">Admin</a>
+            <a style="color:red" class="py-2 d-none d-md-inline-block" href="/login">Profils</a>
+        @endcan
     </div>
 </nav>

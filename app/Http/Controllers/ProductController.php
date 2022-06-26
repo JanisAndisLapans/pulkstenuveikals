@@ -181,11 +181,6 @@ class ProductController extends Controller
             $items = $items->sortByDesc('price');
         }
 
-        foreach($items as $item)
-        {
-            Log::info($item->name);
-        }
-
         return response()->json(['items' => $items->toArray()]);
     }
         /**

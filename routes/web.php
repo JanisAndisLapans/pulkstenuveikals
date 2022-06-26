@@ -23,6 +23,14 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 
+Auth::routes([
+    'register' => false,
+    'reset' => false,
+    'verify' => false,
+]);
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
 Route::get('/', [ProductController::class, 'indexListing']);
 
 Route::post("/filter", [ProductController::class, 'indexListingFilter']);
@@ -43,6 +51,7 @@ Route::get('/cart', [CartController::class, 'indexCart']);
 Route::get('/del', [CartController::class, 'deleteCart']);
 Route::get('cart/success', [CartController::class, 'succeedOrder']);
 Route::post('cart/order/{itemcounts}', [OrderController::class, 'makeOrder']);
+
 Route::get('admin/product', [ProductController::class, 'index']);
 Route::get('admin/user', [UserController::class, 'index']);
 Route::get('admin/review', [ReviewController::class, 'index']);
@@ -50,13 +59,7 @@ Route::get('admin/order', [OrderController::class, 'index']);
 Route::get('admin/inquiry', [InquiryController::class, 'index']);
 Route::get('admin/answer', [AnswerController::class, 'index']);
 Route::get('admin/category', [CategoryController::class, 'index']);
-Route::delete('admin/user/{id}', [UserController::class, 'destroy']);
-Route::delete('admin/product/{id}', [ProductController::class, 'destroy']);
-Route::delete('admin/review/{id}', [ReviewController::class, 'destroy']);
-Route::delete('admin/order/{id}', [OrderController::class, 'destroy']);
-Route::delete('admin/inquiry/{id}', [InquiryController::class, 'destroy']);
-Route::delete('admin/answer/{id}', [AnswerController::class, 'destroy']);
-Route::delete('admin/category/{id}', [CategoryController::class, 'destroy']);
+
 Route::get('admin/review/create', [ReviewController::class, 'create']);
 Route::get('admin/user/create', [UserController::class, 'create']);
 Route::get('admin/product/create', [ProductController::class, 'create']);
@@ -64,13 +67,7 @@ Route::get('admin/inquiry/create', [InquiryController::class, 'create']);
 Route::get('admin/answer/create', [AnswerController::class, 'create']);
 Route::get('admin/category/create', [CategoryController::class, 'create']);
 Route::get('admin/order/create', [OrderController::class, 'create']);
-Route::post('admin/review', [ReviewController::class, 'store']);
-Route::post('admin/user', [UserController::class, 'store']);
-Route::post('admin/product', [ProductController::class, 'store']);
-Route::post('admin/inquiry', [InquiryController::class, 'store']);
-Route::post('admin/answer', [AnswerController::class, 'store']);
-Route::post('admin/category', [CategoryController::class, 'store']);
-Route::post('admin/order', [OrderController::class, 'store']);
+
 Route::post('admin/order/many', [OrderController::class, 'indexMany']);
 Route::post('admin/product/many', [ProductController::class, 'indexMany']);
 Route::post('admin/category/many', [CategoryController::class, 'indexMany']);
@@ -91,13 +88,7 @@ Route::post('admin/category/search', [CategoryController::class, 'filter']);
 Route::get('admin/category/search', function(){return redirect("admin/category");});
 Route::post('admin/answer/search', [AnswerController::class, 'filter']);
 Route::get('admin/answer/search', function(){return redirect("admin/answer");});
-Route::put('admin/product/{id}', [ProductController::class, 'update']);
-Route::put('admin/user/{id}', [UserController::class, 'update']);
-Route::put('admin/review/{id}', [ReviewController::class, 'update']);
-Route::put('admin/order/{id}', [OrderController::class, 'update']);
-Route::put('admin/inquiry/{id}', [InquiryController::class, 'update']);
-Route::put('admin/answer/{id}', [AnswerController::class, 'update']);
-Route::put('admin/category/{id}', [CategoryController::class, 'update']);
+
 Route::get('admin/review/edit/{id}', [ReviewController::class, 'edit']);
 Route::get('admin/user/edit/{id}', [UserController::class, 'edit']);
 Route::get('admin/product/edit/{id}', [ProductController::class, 'edit']);
@@ -108,10 +99,26 @@ Route::get('admin/order/edit/{id}', [OrderController::class, 'edit']);
 Route::get('admin', [AdminController::class, 'index']);
 Route::get('403ERROR', function(){return view("403ERROR");});
 
-Auth::routes([
-    'register' => false,
-    'reset' => false,
-    'verify' => false,
-]);
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::group(['middleware' => 'log.route'], function () {
+    Route::delete('admin/user/{id}', [UserController::class, 'destroy']);
+    Route::delete('admin/product/{id}', [ProductController::class, 'destroy']);
+    Route::delete('admin/review/{id}', [ReviewController::class, 'destroy']);
+    Route::delete('admin/order/{id}', [OrderController::class, 'destroy']);
+    Route::delete('admin/inquiry/{id}', [InquiryController::class, 'destroy']);
+    Route::delete('admin/answer/{id}', [AnswerController::class, 'destroy']);
+    Route::delete('admin/category/{id}', [CategoryController::class, 'destroy']);
+    Route::post('admin/review', [ReviewController::class, 'store']);
+    Route::post('admin/user', [UserController::class, 'store']);
+    Route::post('admin/product', [ProductController::class, 'store']);
+    Route::post('admin/inquiry', [InquiryController::class, 'store']);
+    Route::post('admin/answer', [AnswerController::class, 'store']);
+    Route::post('admin/category', [CategoryController::class, 'store']);
+    Route::post('admin/order', [OrderController::class, 'store']);
+    Route::put('admin/product/{id}', [ProductController::class, 'update']);
+    Route::put('admin/user/{id}', [UserController::class, 'update']);
+    Route::put('admin/review/{id}', [ReviewController::class, 'update']);
+    Route::put('admin/order/{id}', [OrderController::class, 'update']);
+    Route::put('admin/inquiry/{id}', [InquiryController::class, 'update']);
+    Route::put('admin/answer/{id}', [AnswerController::class, 'update']);
+    Route::put('admin/category/{id}', [CategoryController::class, 'update']);
+});

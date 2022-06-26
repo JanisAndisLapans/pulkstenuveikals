@@ -11,8 +11,8 @@ class AnswerController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only("index", "create", "store");
-        $this->middleware('auth.admin')->only("destroy", "edit", "update");
+        $this->middleware('auth')->only("index", "create", "store", "update", "destroy", "edit");
+
     }
 
     public function answer(Request $request, $inqId)

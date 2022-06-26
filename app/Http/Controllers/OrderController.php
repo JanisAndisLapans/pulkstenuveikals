@@ -14,8 +14,8 @@ class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only("index");
-        $this->middleware('auth.admin')->only( "create", "store", "update", "destroy", "edit");
+        $this->middleware('auth')->only("index", "create", "store", "update", "destroy", "edit");
+
     }
 
     public function makeOrder(Request $request, $itemcounts)
