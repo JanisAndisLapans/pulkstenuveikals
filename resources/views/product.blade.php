@@ -36,10 +36,10 @@
                         width: 400,
                         modal: true,
                         buttons: {
-                            "Palikt": function() {
+                            "{{__('product.stay')}}": function() {
                                 $( this ).dialog( "close" );
                             },
-                            "Doties uz grozu": function() {
+                            "{{__('product.go_to_cart')}}": function() {
                                 window.location.href = "/cart";
                             }
                         },
@@ -50,7 +50,7 @@
                 } );
             </script>
             <div class="position-absolute top-0" id="dialog-confirm">
-                <p><span style="float:left; margin:12px 12px 20px 0;"></span>Veiksmīgi pievienots grozam</p>
+                <p><span style="float:left; margin:12px 12px 20px 0;"></span>{{__('product.successfully_added_to_cart')}}</p>
             </div>
         @endif
 
@@ -62,10 +62,11 @@
                 <div class="col-7">
                     <div>
                         <span style="font-size: 30px" class="text-decoration-underline fw-bold">{{$item->name}}</span>
+                        <br>
                         @if($reviews->count()>0)
                             <span class="rating"></span>
                         @else
-                            <span style="color:gray">(Nav novērtēts)</span>
+                            <span style="color:gray">({{__('product.not_rated')}})</span>
                         @endif
                     </div>
                     {{$item->desc}}
@@ -73,7 +74,7 @@
                     <form class="float-end" method="POST"
                           action="{{action([App\Http\Controllers\CartController::class, 'addToCart'], $item->slug)}}" >
                         @csrf
-                        <input type="submit" class="btn btn-success mt-3" value="Pirkt {{$item->price}}€"/>
+                        <input type="submit" class="btn btn-success mt-3" value="{{__('product.buy')}} {{$item->price}}€"/>
                         <input type="text" name="id" id="id" value="{{$item->id}}" hidden>
                         <input type="number" name="numberOf" id="numberOf" class="form-control" style="width: 80px" value="1">
                     </form>
@@ -105,12 +106,12 @@
             <div  class="mt-3 container">
                 <div class="row">
                     <div class="col-6">
-                        <h3 class="text-success">Lietotāju jautājumi: </h3>
+                        <h3 class="text-success">{{__('product.user_inqs')}}: </h3>
                     </div>
                     <div class="col-2">
                         <button class="btn btn-success text-white"
                                 aria-controls="collapseInq" aria-expanded="false" data-bs-target="#collapseInq" data-bs-toggle="collapse">
-                            Pievienot jautājumu</button>
+                            {{__('product.add_inq')}}</button>
                     </div>
                 </div>
             </div>
@@ -119,8 +120,8 @@
                       action="{{action([App\Http\Controllers\InquiryController::class, 'ask'], $item->id)}}">
                     @csrf
                     <textarea name="question" id="question" rows="5" cols="80" class="form-control w-50" maxlength="200"></textarea>
-                    <input style="font-size: 20px" type="submit" class="btn btn-warning text-white" value="Jautāt"/>
-                    Atlikušās zīmes: <span class="characterCount">200</span>
+                    <input style="font-size: 20px" type="submit" class="btn btn-warning text-white" value="{{__('product.inquire')}}"/>
+                    {{__('product.remaining_chars')}}: <span class="characterCount">200</span>
                 </form>
             </div>
             <hr>
@@ -128,7 +129,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-auto">
-                            <small style="color: grey;">Jautājums {{$inq->updated_at}}</small><br>
+                            <small style="color: grey;">{{__('product.question')}} {{$inq->updated_at}}</small><br>
                             <div  style="width : 25vw; word-wrap: break-word">
                                 {{$inq->question}}
                             </div>
@@ -136,7 +137,7 @@
                         <div class="col">
                             <button class="btn btn-success text-white"
                                     aria-controls="collapseAns{{$inq->id}}" aria-expanded="false" data-bs-target="#collapseAns{{$inq->id}}" data-bs-toggle="collapse">
-                                Pievienot atbildi</button>
+                                {{__('product.add_ans')}}</button>
                         </div>
                     </div>
                 </div>
@@ -150,15 +151,15 @@
                                 $('.characterCount{{$inq->id}}').text(200-$(this).val().length);
                             });
                         </script>
-                        <input style="font-size: 14px" type="submit" class="btn btn-warning text-white" value="Atbildēt"/>
-                        Atlikušās zīmes: <span class="characterCount{{$inq->id}}">200</span>
+                        <input style="font-size: 14px" type="submit" class="btn btn-warning text-white" value="{{__('product.inquire')}}"/>
+                        {{__('product.remaining_chars')}}: <span class="characterCount{{$inq->id}}">200</span>
                     </form>
                 </div>
                 @if(isset($answers[$inq->id]))
                     @foreach($answers[$inq->id] as $ans)
                         <div style="margin-left: 20vw">
-                            <small style="color: grey;">Abilde: {{$ans->updated_at}}</small><br>
-                            <div style="width : 25vw; word-wrap: break-wor{{$ans->ans}}
+                            <small style="color: grey;">{{__('product.inq_answer')}}: {{$ans->updated_at}}</small><br>
+                            <div style="width : 25vw; word-wrap: break-word">{{$ans->ans}}
                             </div>
                         </div>
                     @endforeach
@@ -167,12 +168,12 @@
     <div  class="mt-3 container">
         <div class="row">
             <div class="col-6">
-                <h3 class="text-success">Atsauces : </h3>
+                <h3 class="text-success">{{__('product.review')}}: </h3>
             </div>
             <div class="col-2">
                 <button class="btn btn-success text-white"
                         aria-controls="collapseReview" aria-expanded="false" data-bs-target="#collapseReview" data-bs-toggle="collapse">
-                    Pievienot atsauci</button>
+                    {{__('product.add_review')}}</button>
             </div>
         </div>
     </div>
@@ -180,12 +181,12 @@
     <div class="collapse @if(session()->has('verifyStart'))show @endif "id="collapseReview">
         <form method="POST" action="{{action([App\Http\Controllers\ReviewController::class, 'startVerification'], $item->id)}}">
             @csrf
-            <p>Lai pievienotu atsauci, Jums būs jāapstiprina e-pasts, ar kuru veicāt pirkumu</p>
-            <label>Pasūtījuma numurs: </label>
+            <p>{{__('product.to_add_review_verify_email')}}</p>
+            <label>{{__('product.order_nr')}}: </label>
             <input value="{{old('id')}}" type="number" class="form-control" name="id" style="width:120px"> <br>
-            <label>E-pasts: </label>
+            <label>{{__('product.email')}}: </label>
             <input class="form-control" id="email" name="email" value="{{old('email')}}" style="width: 400px"/>
-            <input type="submit" class="btn btn-warning text-white" value="Nosūtīt" style="font-size: 20px" />
+            <input type="submit" class="btn btn-warning text-white" value="{{__('product.send')}}" style="font-size: 20px" />
         </form>
     </div>
     <hr>
@@ -210,13 +211,13 @@
     <script>
     $(document).ready(function() {
         @if(session('verifyStart') == 'failEmail')
-            window.alert("{{session('email')}} nepieder norādītajam pasūtījumam. Ievadiet e-pastu, ar kuru veicāt pasūtījumu");
+            window.alert("{{session('email')}} {{("product.email_doesn't_belong")}}");
         @elseif(session('verifyStart') == 'failId')
-        window.alert("Norādītajā pasūtījumā nav produkta: {{$item->name}}.");
+        window.alert("{{("product.product_isnt")}}: {{$item->name}}.");
         @elseif(session('verifyStart') == 'failRepeat')
-        window.alert("Jūs jau novērtējāt šo produktu.");
+        window.alert("{{("product.already_rated")}}.");
         @elseif(session('verifyStart') == 'ok')
-            window.alert("Dodieties uz {{session('email')}}, lai apstiprinātu sevi!");
+            window.alert("{{("product.go_to")}} {{session('email')}}{{("product.to_verify")}}");
         @endif
         $('#question').on('input', function() {
             $('.characterCount').text(200-$(this).val().length);

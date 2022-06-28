@@ -11,12 +11,12 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-    <title>Veiksmīgi pasūtīts</title>
+    <title>{{__('orderSuccess.title')}}</title>
 </head>
 <body>
     <x-title-menu/>
     <h1 class="text-success">
-        Veiksmīgi veikts pasūtījums! Papildus informācija e-pastā.
+        {{__('orderSuccess.success')}}
     </h1>
 </body>
 </html>

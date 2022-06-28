@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-    <title>Pulksteņu veikals</title>
+    <title>{{__('listing.title')}}</title>
 </head>
 <body>
 <x-title-menu/>
@@ -24,8 +24,8 @@
                 <div class="row">
                     @foreach($row_items as $item)
                         @if($item->active)
-                            <div class="col" onclick="window.location.href = '/product/' + '{{$item->slug}}' " style="cursor: pointer;">
-                                <div class="row border border-4 border-dark bg-light" style="word-wrap:break-word">
+                            <div class="col" onclick="window.location.href = '/product/' + '{{$item->slug}}' " style="cursor: pointer; flex: 0 0 33%">
+                                <div class="row border border-4 border-dark bg-light" style="word-wrap:break-word; height: 550px" >
                                     <div class="col-4 w-100">
                                         <img src="/{{$item->image}}" style="height: 350px; width: 270px"/>
                                     </div>
@@ -79,18 +79,18 @@
             <form id="filterForm">
             @csrf
             <div class="mt-3">
-                <buton id="filterSub" type="button" class="btn btn-success">ATLASĪT</buton>
+                <buton id="filterSub" type="button" class="btn btn-success text-uppercase">{{__('listing.filter')}}</buton>
             </div>
             <div class="mt-3">
-                <label class="form-label"><h5>Nosaukums precei:</h5></label> <br>
+                <label class="form-label"><h5>{{__('listing.product_name')}}: </h5></label> <br>
                 <input class="form-control" name="name" id="name"/>
             </div>
             <div class="mt-3">
-                <label class="form-label"><h5>Cena:</h5></label> <br>
+                <label class="form-label"><h5>{{__('listing.product_price')}}: </h5></label> <br>
                 <div class="row">
-                    no
+                    {{__('listing.from')}}
                     <input  class = "form-control h-25" type="text" name="lowPrice" id="lowPrice" readonly style=" color:#f6931f; font-weight:bold; width: 40%">
-                    līdz
+                    {{__('listing.to')}}
                     <input  class = "form-control h-25" type="text" name="highPrice" id="highPrice" readonly style=" color:#f6931f; font-weight:bold; width: 40%">
                 </div>
                 <br>
@@ -99,16 +99,16 @@
                 <div id="slider-rangeSmall"></div>
 
                 <div class="mt-1">
-                    <label class="form-check-label">Jaunākās vispirms</label>
-                    <input id="new" name="sort"  type="radio" value="new" checked>
-                    <label class="form-check-label">Lētākas vispirms</label>
-                    <input id="cheap" name="sort"  type="radio" value="cheap">
-                    <label class="form-check-label">Dārgākās vispirms</label>
+                    <label class="form-check-label">{{__('listing.newest')}}</label>
+                    <input id="new" name="sort"  type="radio" value="new" checked><br>
+                    <label class="form-check-label">{{__('listing.cheapest')}}</label>
+                    <input id="cheap" name="sort"  type="radio" value="cheap"><br>
+                    <label class="form-check-label">{{__('listing.expensive')}}</label>
                     <input id="expensive" name="sort" type="radio" value="expensive">
                 </div>
             </div>
             <div class="mt-3">
-                <label class="form-label"><h5>Kategorijas:</h5></label> <br>
+                <label class="form-label"><h5>{{__('listing.categories')}}:</h5></label> <br>
             </div>
             <div class="mt-1">
                 @foreach($categories as $cateParent => $cates)
@@ -123,7 +123,7 @@
                                 <input class="{{$stripped}}All" name="{{$stripped}}All" type="checkbox" class="form-check-input" checked/>
                                 @foreach($cates as $cate)
                                     <label class="form-check-label">{{$cate}}</label>
-                                    <input class="{{$stripped}}" name="{{str_replace(' ','',$cate)}}" type="checkbox" class="form-check-input" checked/>
+                                    <input class="{{$stripped}}" name="{{str_replace([' ', ',', '.', "'"],'',$cate)}}" type="checkbox" class="form-check-input" checked/>
                                     <br>
                                 @endforeach
                             </div>
@@ -164,10 +164,10 @@
                     'lowPrice' : $("input[name=lowPrice]").val(),
                     'highPrice' : $("input[name=highPrice]").val(),
                     @foreach($categories as $cateParent => $cates)
-                        @php($stripped = str_replace(' ','',$cateParent))
+                        @php($stripped = str_replace([' ', ',', '.', "'"],'',$cateParent))
                         'All{{$stripped}}' : $("input[name={{$stripped}}All]:checked").val(),
                     @foreach($cates as $cate)
-                        @php($cstripped = str_replace(' ','',$cate))
+                        @php($cstripped = str_replace([' ', ',', '.', "'"],'',$cate))
                         'Cate{{$cstripped}}' : $("input[name={{$cstripped}}]:checked").val(),
                     @endforeach
                     @endforeach
@@ -175,8 +175,8 @@
                 success:function(data) {
                     let listingHolder = $("#listingHolder");
                     const card = `
-                                    <div class="col" onclick="window.location.href = '/product/{slug}' " style="cursor: pointer;">
-                                    <div class="row border border-4 border-dark bg-light" style="word-wrap:break-word">
+                                    <div class="col" onclick="window.location.href = '/product/{slug}' " style="cursor: pointer; flex: 0 0 33%">
+                                    <div class="row border border-4 border-dark bg-light" style="word-wrap:break-word; height: 550px">
                                         <div class="col-4 w-100">
                                             <img src="/{image}" style="height: 350px; width: 270px"/>
                                         </div>
@@ -215,10 +215,14 @@
                             return aprice > bprice ? -1 : 1;
                         });
                     }
-                    for(let i = 0;i <items.length; i++)
+                    let realInd = 0;
+                    for(let i = 0;i<items.length;i++)
                     {
                         let item = items[i];
-                        if(i%3==0){
+                        if(!item.active){
+                            continue;
+                        }
+                        if(realInd%3==0){
                             toAdd += '<div class="row">';
                         }
                         let desc = item.desc;
@@ -228,19 +232,13 @@
                         }
                         toAdd += card.replace('{slug}', item.slug).replace('{image}', item.image).replace('{name}', item.name).
                         replace('{price}', item.price).replace('{desc}', desc);
-                        if(i%3==2){
+                        if(realInd%3==2){
                             toAdd += '</div>';
                         }
+                        realInd++;
                     }
-/*                    $.each(data.items, function(index, item) {
-
-                    });*/
                     listingHolder.html(toAdd);
                 },
-                error: function(jqXhr, textStatus, errorMessage){
-                    console.log(errorMessage);
-                    window.alert(123);
-                }
             });
         });
 

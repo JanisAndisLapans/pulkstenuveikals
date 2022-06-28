@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'buy' => 'Purchase',
+    'successfully_added_to_cart' => 'Successfully added to the cart',
+    'not_rated' => 'Not rated',
+    'user_inqs' => 'User questions',
+    'add_inq' => 'Add a question',
+    'remaining_chars' => 'Remaining characters',
+    'question' => 'Inquiry',
+    'add_ans' => 'Add answer',
+    'inquire' => 'Inquire',
+    'answer' => 'Answer',
+    'inq_answer' => 'Answer',
+    'review' => 'Reviews',
+    'add_review' => 'Add review',
+    'to_add_review_verify_email' => 'To add a review, you must verify the e-mail which was used for the order',
+    'order_nr' => 'Order number',
+    'email' => 'E-mail',
+    'send' => 'Send',
+    "email_doesn't_belong" => "doesn't belong to the specified order. Enter the e-mail you used to make the order",
+    'product_isnt' => "This product isn't in the specified order",
+    'already_rated' => 'You already rated this product.',
+    'go_to' => 'Go to',
+    'to_verify' => 'to verify yourself',
+    'go_to_cart' => 'Go to cart',
+    'stay' => 'Stay',
+];

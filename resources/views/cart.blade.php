@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-    <title>Iepirkumu grozs</title>
+    <title>{{__('cart.cart')}}</title>
 </head>
 <body>
     <x-title-menu/>
@@ -25,7 +25,7 @@
                     <h2><b class="text-success">{{$item->name}}</b></h2>
                 </div>
                 <div class="col-2">
-                    <h2> Skaits: {{$item->count}}</h2>
+                    <h2> {{__('cart.count')}}: {{$item->count}}</h2>
                 </div>
                 <div class="col-2">
                     <h2 class="text-success"> {{number_format($item->price*$item->count,2,'.', '')}}€</h2>
@@ -36,7 +36,7 @@
                         @csrf
                         @method('delete')
                         <input id="id" name="id" value="{{$item->id}}" hidden/>
-                        <input class="btn btn-danger text-uppercase text-s h3" type="submit" value="dzēst">
+                        <input class="btn btn-danger text-uppercase text-s h3" type="submit" value="{{__('cart.delete')}}">
                     </form>
                 </div>
             </div>
@@ -44,8 +44,8 @@
     </div>
     <div class="text-center" style="font-size:30px">
         <Button aria-controls="collapse" aria-expanded="false" data-bs-toggle="collapse" data-bs-target="#collapse" class="btn btn-success text-uppercase w-25"
-        @if(!isset($totalPrice)) hidden @endif>Pirkt</Button>
-        Kopā :@if(isset($totalPrice)) {{number_format($totalPrice, 2, '.', '')}} @else 0 @endif €
+        @if(!isset($totalPrice)) hidden @endif>{{__('cart.buy')}}</Button>
+        {{__('cart.total')}} :@if(isset($totalPrice)) {{number_format($totalPrice, 2, '.', '')}} @else 0 @endif €
     </div>
     <div id="collapse" class="collapse @if(isset($errors) && $errors->count()>0) show @endif">
         <div class="position-fixed top-0 stat-0 bg-black opacity-50 vh-100 vw-100"></div>
@@ -66,38 +66,38 @@
                           action="cart/order/{{$itemcounts}}">
                         @csrf
                     <div class="text-center fw-bold" style="font-size: 20px">
-                        Pasūtījuma adrese
+                        {{__('cart.order_addr')}}
                     </div>
-                    <label class="fw-bold"> e-pasts* : </label>
+                    <label class="fw-bold"> {{__('cart.email')}}* : </label>
                     <input name="email" id="email" class="form-control w-75" value = "{{old('email')}}" /> <br>
-                    <label class="fw-bold"> telefons* : </label>
+                    <label class="fw-bold"> {{__('cart.phone')}}* : </label>
                     <input type="number" name="phone" id="phone" class="form-control w-75" value = "{{old('phone')}}" /> <br>
-                    <label class="fw-bold"> Pilsēta* : </label>
+                    <label class="fw-bold"> {{__('cart.city')}}* : </label>
                     <input name="city" id="city" class="form-control w-75" value = "{{old('city')}}"/> <br>
-                    <label class="fw-bold"> Iela* : </label>
+                    <label class="fw-bold"> {{__('cart.street')}}* : </label>
                     <input name="street" id="street" class="form-control w-75" value = "{{old('street')}}"/> <br>
-                    <label class="fw-bold"> Dzīvoklis : </label>
+                    <label class="fw-bold"> {{__('cart.apartament')}} : </label>
                     <input name="apartament" id="apartament" class="form-control w-75" value = "{{old('apartament')}}"/> <br>
-                    <label class="fw-bold"> ZIP kods* : </label>
+                    <label class="fw-bold"> {{__('cart.zip')}}* : </label>
                     <input name="zip" id="zip" class="form-control w-75" value = "{{old('zip')}}"/> <br>
                 </form>
                 <div class="text-center fw-bold" style="font-size: 20px">
-                    Maksājuma karte
+                    {{__('cart.payemnt_card')}}
                 </div>
                 <select id="cards">
                     <option value="Visa">Visa</option>
                     <option value="Mastercard">Mastercard</option>
                 </select>
                 <br>
-                <label class="fw-bold"> Kartes īpašnieka vārds un uzvārds* : </label>
+                <label class="fw-bold"> {{__('cart.card_owner')}}* : </label>
                 <input id="cardholder" class="form-control w-75"/> <br>
-                <label class="fw-bold"> Kartes numurs* : </label>
+                <label class="fw-bold"> {{__('cart.number')}}* : </label>
                 <input id="cnumber" class="form-control w-75"/> <br>
                 <label class="fw-bold"> CVC* : </label>
                 <input id="cvc" class="form-control w-75"/> <br>
                 <div class="mb-5"/>
                 <div class="text-center">
-                    <button type="submit" class="btn btn-success text-uppercase" form="payForm">Maskāt</button>
+                    <button type="submit" class="btn btn-success text-uppercase" form="payForm">{{__('cart.pay')}}</button>
                 </div>
                 </div>
         </div>

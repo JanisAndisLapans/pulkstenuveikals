@@ -22,14 +22,13 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LanguageController;
 
 Auth::routes([
     'register' => false,
     'reset' => false,
     'verify' => false,
 ]);
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/', [ProductController::class, 'indexListing']);
 
@@ -39,12 +38,13 @@ Route::get("/filter", function()
     return redirect('/');
 });
 
+Route::post('/swapLang', [LanguageController::class, 'change']);
 Route::get('/product/{slug}', [ProductController::class, 'show']);
 Route::post("/product/{slug}", [CartController::class, 'addToCart']);
 Route::post("/product/verifyRew/{productId}", [ReviewController::class, 'startVerification']);
 Route::post('/product/ask/{productId}', [InquiryController::class, 'ask']);
 Route::get('/product/review/{code}', [ReviewController::class, 'reviewPage']);
-Route::post('/product/review/{productId}/order/{orderId}', [ReviewController::class, 'review']);
+Route::post('/product/review/{productId}/order/{orderId}/{code}', [ReviewController::class, 'review']);
 Route::post('/product/answer/{inqId}', [AnswerController::class, 'answer']);
 Route::delete("/cart/delete", [CartController::class, 'removeFromCart']);
 Route::get('/cart', [CartController::class, 'indexCart']);

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ReviewVerificationCode;
 use Mail;
+use Cookie;
 
 class ReviewController extends Controller
 {
@@ -58,33 +59,55 @@ class ReviewController extends Controller
         $verificationCodeInst->code = $code;
         $verificationCodeInst->order_id = $order->id;
         $verificationCodeInst->save();
-
-        Mail::raw("Spiediet: www.pulkstenuveikals.lv/product/review/$code", function($message) use ($request) {
-            $message->to($request->email, 'Cienījamais klients')->subject
-            ('Pulksteņu Veikala atsauces publicēšanas apstiprinājums');
-        });
+        $lang = Cookie::get('lang');
+        if($lang=='lv') {
+            Mail::raw("Spiediet: www.pulkstenuveikals.lv/product/review/$code", function ($message) use ($request) {
+                $message->to($request->email, 'Cienījamais klients')->subject
+                ('Pulksteņu Veikala atsauces publicēšanas apstiprinājums');
+            });
+        }else{
+            Mail::raw("Click: www.pulkstenuveikals.lv/product/review/$code", function ($message) use ($request) {
+                $message->to($request->email, 'Valued Customer')->subject
+                ('Watch Store review verification');
+            });
+        }
 
         return back()->with('verifyStart','ok')->with('email', $request->email)->withInput();
     }
 
     public function reviewPage($code)
     {
+        $lang = Cookie::get('lang');
         $rewVer = ReviewVerificationCode::firstWhere('code', $code);
         $item = Product::firstWhere('id', $rewVer->product_id);
+        $item->{'name'} = $item->{"name_$lang"};
         $orderId = $rewVer->order_id;
-        return view('review', compact('item', 'orderId'));
+        return view('review', compact('item', 'orderId', 'code'));
     }
 
-    public function review(Request $request, $productId, $orderId)
+    public function review(Request $request, $productId, $orderId, $code)
     {
+        $lang = Cookie::get('lang');
+        $ver_erros_lang = ['lv' => "Nederīgs apstiprinājums vai jau novērtēts", 'en' => "Invalid verification or already rated"];
+        $rewVer = ReviewVerificationCode::firstWhere('code', $code);
+        if($rewVer==null){
+            return back()->withErrors('Error', $ver_erros_lang[$lang]);
+        }
+        $lang_errors = [
+            'lv' => [
+                'review.required_unless' => 'Lūdzu, pievienojiet aprakstu vai novērtējiet maksimāli!',
+                'rating.required' => 'Lūdzu, novērtējiet produktu ar 0-5 zvaigznēm!'
+            ],
+            'en' => [
+                'review.required_unless' => 'Please, add a descrition or rate with 5 stars',
+                'rating.required' => 'Please, rate the product with 0-5 stars'
+            ],
+        ];
         $request->validate([
             'rating' => ['required'],
-            'review' => ['required_unless:stars,5'],
+            'review' => ['required_unless:rating,5'],
         ],
-        [
-            'review.required_unless' => 'Lūdzu, pievienojiet aprakstu vai novērtējiet maksimāli!',
-            'rating.required' => 'Lūdzu, novērtējiet produktu ar 0-5 zvaigznēm!'
-        ]
+            $lang_errors[$lang]
         );
 
         $review = new Review();
@@ -95,7 +118,7 @@ class ReviewController extends Controller
         $review->save();
 
         $item = Product::firstWhere('id', $productId);
-
+        ReviewVerificationCode::findOrFail($rewVer->id)->delete();
         return redirect('/product/'.$item->slug);
     }
 

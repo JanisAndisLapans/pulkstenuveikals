@@ -17,18 +17,18 @@
     </head>
     <body>
         <x-title-menu/>
-        <h3 class="text-success">Atsauce {{$item->name}}: </h3>
+        <h3 class="text-success">{{__('review.title')}} {{$item->name}}: </h3>
         @if(isset($errors)) <x-error-display :errors="$errors"/> @endif
         <div class="rating"></div>
         <form method="POST"
-            action="{{action([App\Http\Controllers\ReviewController::class, 'review'], [$item->id, $orderId])}}"
+            action="{{action([App\Http\Controllers\ReviewController::class, 'review'], [$item->id, $orderId, $code])}}"
         >
             @csrf
-            <input name="rating" id="ratingNum" value="4" hidden/>
+            <input name="rating" id="ratingNum" value="@if(old('rating')!=null) {{old('rating')}} @else 4 @endif" />
             <hr>
             <textarea name="review" id="review" rows="5" cols="80" class="form-control w-50" maxlength="400">{{old('review')}}</textarea>
-            Atlikušās zīmes: <span class="characterCount">400</span>
-            <input value="Novērtēt" type="submit" class="btn btn-warning" style="font-size: 20px"/>
+            {{__('review.remaining_chars')}}: <span class="characterCount">400</span>
+            <input value="{{__('review.rate')}}" type="submit" class="btn btn-warning" style="font-size: 20px"/>
         </form>
     </body>
     <script>

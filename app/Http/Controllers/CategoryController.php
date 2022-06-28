@@ -36,7 +36,8 @@ class CategoryController extends Controller
 
     public function filter(Request $request)
     {
-        $query = Category::where('name', 'like', "%$request->name%");
+        $query = Category::where("name_en", 'like', "%$request->name_en%");
+        $query = $query->where("name_lv", 'like', "%$request->name_lv%");
         if($request->category_id!=null){
             if($request->category_id!=0){
                 $query->where('category_id', $request->category_id);
@@ -100,11 +101,13 @@ class CategoryController extends Controller
     {
         if(isset($request['name'])){$request['slug'] = strtolower(str_replace([' '], [], $request->name));}
         $request->validate([
-            'name' => ['required', 'unique:categories']
+            'name_en' => ['required', 'unique:categories'],
+            'name_lv' => ['required', 'unique:categories'],
         ]);
 
         $category = new Category();
-        $category->name = $request->name;
+        $category->name_en = $request->name_en;
+        $category->name_lv = $request->name_lv;
         if($request->category_id!="blank") {
             $category->category_id = $request->category_id;
         }
@@ -166,11 +169,14 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => ['required', "unique:categories,name,$id"]
+            'name_en' => ['required', "unique:categories,name_en,$id"],
+            'name_lv' => ['required', "unique:categories,name_lv,$id"]
+
         ]);
         $query =  Category::where('id', $id);
         $query->update([
-            'name' => $request->name
+            'name_en' => $request->name_en,
+            'name_lv' => $request->name_lv
         ]);
         if($request->category_id!="blank") {
             $query->update([

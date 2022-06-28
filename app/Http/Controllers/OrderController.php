@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Order;
 use Mail;
 use Log;
+use Cookie;
 use SebastianBergmann\CodeCoverage\Report\PHP;
 
 class OrderController extends Controller
@@ -20,13 +21,7 @@ class OrderController extends Controller
 
     public function makeOrder(Request $request, $itemcounts)
     {
-        $request->validate([
-            'phone' => ['numeric', 'digits:8', 'required'],
-            'email' => [ 'email', 'required'],
-            'city' => ['required'],
-            'street' => ['required'],
-            'zip' => "required|regex:/^LV-[0-9]+$/"
-        ], [
+        $lang_errors =[ 'lv' => [
             'phone.numeric' => 'Telefons drīkst saturēt tikai ciparus',
             'phone.digits' => 'Telefona garums ir 8 cipari. Atļauti tikai Latvijas telefoni',
             'phone.required' => "Telefona numurs ir obligāts",
@@ -36,7 +31,28 @@ class OrderController extends Controller
             'street.required' => 'Iela ir nepieciešama',
             'zip.required' => 'ZIP kods ir nepieciešams',
             'zip.regex' => 'ZIP koda formāts : LV-{numurs}, piem., LV-1040'
-        ]);
+        ],
+        'en' =>
+            [
+                'phone.numeric' => 'Phone number can only contain digits',
+                'phone.digits' => 'Phone number is 8 numbers. Only latvian phones allowed.',
+                'phone.required' => "Phone number is required",
+                'email.email' => 'Email format incorrect',
+                'email.required' => 'E-mail is required',
+                'city.required' => 'City is required',
+                'street.required' => 'Street is required',
+                'zip.required' => 'ZIP code is required',
+                'zip.regex' => 'ZIP code format : LV-{number}, e.g., LV-1040'
+            ],
+        ];
+
+        $request->validate([
+            'phone' => ['numeric', 'digits:8', 'required'],
+            'email' => [ 'email', 'required'],
+            'city' => ['required'],
+            'street' => ['required'],
+            'zip' => "required|regex:/^LV-[0-9]+$/"
+        ], $lang_errors[Cookie::get('lang')]);
 
         $order = new Order();
         $order->client_phone = $request->phone;
@@ -44,30 +60,52 @@ class OrderController extends Controller
         $order->order_address = "$request->city, $request->street/$request->apartament";
         $order->zip_code = $request->zip;
         $order->save();
-        $body = "Pirkums #$order->id veikts veiksmīgi uz adresi: $order->order_address".PHP_EOL.
-            "Nesaprašanu gadījumā mēs ar Jums sazināsimies: $order->client_phone".PHP_EOL.
-            "Pasūtījuma sastāvā: ".PHP_EOL;
+        $lang = Cookie::get('lang');
+        if($lang=='lv') {
+            $body = "Pirkums #$order->id veikts veiksmīgi uz adresi: $order->order_address" . PHP_EOL .
+                "Nesaprašanu gadījumā mēs ar Jums sazināsimies: $order->client_phone" . PHP_EOL .
+                "Pasūtījuma sastāvā: " . PHP_EOL;
+        }else{
+            $body = "Purchase #$order->id completed succesfully to address: $order->order_address" . PHP_EOL .
+                "In the case of an issue, we will contanct you at: $order->client_phone" . PHP_EOL .
+                "Order contains: " . PHP_EOL;
+        }
         $totalPrice = 0;
 
         $itemcounts = json_decode($itemcounts, true);
 
         $items = Product::whereIn('id', array_keys($itemcounts))->get();
 
-        foreach ($items as $item)
-        {
-            $price = $item->price*$itemcounts[$item->id];
-            $body = $body."$item->count $item->name kopā: $price €".PHP_EOL;
-            $totalPrice += $price;
-            $order->products()->attach($item->id, ['count' => $itemcounts[$item->id]]);
+
+        if($lang=='lv') {
+            $body = $body . "Kopējā veiktā apmaksa: $totalPrice €";
+            Mail::raw($body, function($message) use ($request) {
+                $message->from('pulkstenu@veikals.lv', 'pulkstenuveikals');
+                $message->to($request->email, 'Cienījamais klients')->subject
+                ('Veiksmīgi veikts pirkums Pulksteņu Veikalā');
+            });
+            foreach ($items as $item)
+            {
+                $price = $item->price*$itemcounts[$item->id];
+                $body = $body."$item->count $item->name_lv kopā: $price €".PHP_EOL;
+                $totalPrice += $price;
+                $order->products()->attach($item->id, ['count' => $itemcounts[$item->id]]);
+            }
+        }else{
+            $body = $body . "Total amount paid: $totalPrice €";
+            Mail::raw($body, function($message) use ($request) {
+                $message->from('pulkstenu@veikals.lv', 'Watch Store');
+                $message->to($request->email, 'Valued customer')->subject
+                ('Purchase successful in Watch Store');
+            });
+            foreach ($items as $item)
+            {
+                $price = $item->price*$itemcounts[$item->id];
+                $body = $body."$item->count $item->name_en total: $price €".PHP_EOL;
+                $totalPrice += $price;
+                $order->products()->attach($item->id, ['count' => $itemcounts[$item->id]]);
+            }
         }
-        $body = $body."Kopējā veiktā apmaksa: $totalPrice €";
-
-        Mail::raw($body, function($message) use ($request) {
-            $message->from('pulkstenu@veikals.lv', 'pulkstenuveikals');
-            $message->to($request->email, 'Cienījamais klients')->subject
-            ('Veiksmīgi veikts pirkums Pulksteņu Veikalā');
-        });
-
         return redirect("cart/success");
     }
 

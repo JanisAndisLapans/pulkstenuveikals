@@ -50,8 +50,10 @@ class ProductController extends Controller
 
     public function filter(Request $request)
     {
-        $query = Product::where('name', 'like', "%$request->name%");
-        $query = $query->where('desc', 'like', "%$request->desc%");
+        $query = Product::where('name_en', 'like', "%$request->name_en%");
+        $query = $query->where('name_lv', 'like', "%$request->name_lv%");
+        $query = $query->where('desc_en', 'like', "%$request->desc_en%");
+        $query = $query->where('desc_lv', 'like', "%$request->desc_lv%");
         $query = $query->where('active', $request->has('active'));
 
         if($request->price!=null)
@@ -118,7 +120,14 @@ class ProductController extends Controller
 
     public function indexListing()
     {
+        $lang = Cookie::get('lang');
+
         $items = Product::orderByDesc('created_at')->get();
+        foreach($items as $item)
+        {
+            $item->{'name'} = $item->{"name_$lang"};
+            $item->{'desc'} = $item->{"desc_$lang"};
+        }
         $categoriesRaw = Category::all();
 
         $categories = [];
@@ -127,11 +136,11 @@ class ProductController extends Controller
             if($cate->category_id!=null)
             {
                 $parent = Category::firstWhere("id", "=", $cate->category_id);
-                if(!array_key_exists($parent->name, $categories))
+                if(!array_key_exists($parent->{"name_$lang"}, $categories))
                 {
-                    $categories[$parent->name] = [];
+                    $categories[$parent->{"name_$lang"}] = [];
                 }
-                array_push($categories[$parent->name], $cate->name);
+                array_push($categories[$parent->{"name_$lang"}], $cate->{"name_$lang"});
             }
         }
 
@@ -140,47 +149,45 @@ class ProductController extends Controller
 
     public function indexListingFilter(Request $request)
     {
-        $search_query = Product::where('name', 'LIKE', '%'.$request->name.'%');
+        try {
+            $lang = Cookie::get('lang');
 
-        $lowPrice = $request->lowPrice;
-        $highPrice = $request->highPrice;
+            $search_query = Product::where("name_$lang", 'LIKE', '%'.$request->name.'%');
 
-        $search_query = $search_query->where('price', '>=' , $lowPrice)
-            ->where('price', '<=', $highPrice);
+            $lowPrice = $request->lowPrice;
+            $highPrice = $request->highPrice;
 
-        $parentCates = Category::whereNull('category_id')->get();
-        foreach($parentCates as $pcate){
+            $search_query = $search_query->where('price', '>=', $lowPrice)
+                ->where('price', '<=', $highPrice);
 
-            $spcate = str_replace(' ', '', $pcate->name);
-            if(!$request->{'All'.$spcate}) {
-                $childCates = Category::where('category_id', $pcate->id)->get();
-                $search_query = $search_query->whereHas("categories" , function ($q) use ($childCates, $request) {
-                    $cateNeeded = [];
-                    foreach($childCates as $ccate)
-                    {
-                        $sccate = str_replace(' ', '', $ccate->name);
-                        if($request->{'Cate'.$sccate})
-                        {
-                            array_push($cateNeeded, $ccate->name);
+            $parentCates = Category::whereNull('category_id')->get();
+            foreach ($parentCates as $pcate) {
+                $spcate = str_replace([' ', ',', '.', "'"], '', $pcate->{"name_$lang"});
+                if (!$request->{'All' . $spcate}) {
+                    $childCates = Category::where('category_id', $pcate->id)->get();
+                    $search_query = $search_query->whereHas("categories", function ($q) use ($childCates, $request, $lang) {
+                        $cateNeeded = [];
+                        foreach ($childCates as $ccate) {
+                            $sccate = str_replace([' ', ',', '.', "'"], '', $ccate->{"name_$lang"});
+                            if ($request->{'Cate' . $sccate}) {
+                                array_push($cateNeeded, $ccate->{"name_$lang"});
+                            }
                         }
-                    }
-                    $q->whereIn('name', $cateNeeded);
-                });
+                        $q->whereIn("name_$lang", $cateNeeded);
+                    });
+                }
             }
+            $items = $search_query->get();
         }
-        $items = $search_query->get();
-        if($request->sort == 'new'){
-            $items = $items->sortBy('created_at');
-        }
-        if($request->sort == 'cheap')
-        {
-            $items = $items->sortBy('price');
-        }
-        else if($request->sort = 'expensive')
-        {
-            $items = $items->sortByDesc('price');
-        }
+        catch(\Exception $e){
 
+            Log::error($e);
+            $items = Product::all();
+        }
+        foreach ($items as $item) {
+            $item->{'name'} = $item->{"name_$lang"};
+            $item->{'desc'} = $item->{"desc_$lang"};
+        }
         return response()->json(['items' => $items->toArray()]);
     }
         /**
@@ -215,23 +222,27 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        if(isset($request['name'])){$request['slug'] = strtolower(str_replace([' '], [], $request->name));}
+        if(isset($request['name_lv'])){$request['slug'] = strtolower(str_replace([' '], [], $request->name_lv));}
         $request->validate([
             'image' => ['required'],
-            'name' => ['required', 'min:5' , 'max:50', 'unique:products'],
+            'name_lv' => ['required', 'min:5' , 'max:50', 'unique:products'],
+            'name_en' => ['required', 'min:5' , 'max:50', 'unique:products'],
             'price' => [ 'required', 'numeric'],
-            'desc' => ['max:500', 'required'],
+            'desc_lv' => ['max:1200', 'required'],
+            'desc_en' => ['max:1200', 'required'],
             'active' => ['boolean'],
         ]);
 
         $product = new Product();
-        $product->name = $request->name;
+        $product->name_en = $request->name_en;
+        $product->name_lv = $request->name_lv;
         $product->price = $request->price;
-        $product->desc = $request->desc;
+        $product->desc_en = $request->desc_en;
+        $product->desc_lv = $request->desc_lv;
         $product->active = $request->has('active');
         $product->slug = $request->slug;
         $file = $request->file('image') ;
-        $fileName = str_replace(['-',' ',':'],[],Carbon::now()->toDateTimeString().'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+        $fileName = str_replace(['-',' ',':',',','.',"'"],[],Carbon::now()->toDateTimeString().'.'.pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
         $product->image = $fileName;
         $destinationPath = public_path();
         $file->move($destinationPath,$fileName);
@@ -254,7 +265,10 @@ class ProductController extends Controller
 
     public function show($slug)
     {
+        $lang = Cookie::get('lang');
         $item = Product::firstWhere('slug' , '=', $slug);
+        $item->{"name"} = $item->{"name_$lang"};
+        $item->{"desc"} = $item->{"desc_$lang"};
         $categoriesAssociated = Category::whereHas('products', function($q) use ($item) {
             $q->where('product_id', "=", $item->id);
         }
@@ -266,9 +280,9 @@ class ProductController extends Controller
         foreach($categoriesAssociated as $cate)
         {
             $parent = Category::firstWhere("id", "=", $cate->category_id);
-            if(!isset($categories[$parent->name])) $categories[$parent->name] = [];
+            if(!isset($categories[$parent->{"name_$lang"}])) $categories[$parent->{"name_$lang"}] = [];
 
-            array_push($categories[$parent->name], $cate->name);
+            array_push($categories[$parent->{"name_$lang"}], $cate->{"name_$lang"});
         }
 
         $inquiries = Inquiry::where('product_id', '=', $item->id)->get();
@@ -322,17 +336,21 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(isset($request['name'])){$request['slug'] = strtolower(str_replace([' '], [], $request->name));}
+        if(isset($request['name_lv'])){$request['slug'] = strtolower(str_replace([' '], [], $request->name_lv));}
         $request->validate([
-            'name' => ['required', 'min:5' , 'max:50', "unique:products,name,$id"],
+            'name_lv' => ['required', 'min:5' , 'max:50', "unique:products,name_lv,$id"],
+            'name_en' => ['required', 'min:5' , 'max:50', "unique:products,name_en,$id"],
             'price' => [ 'required', 'numeric'],
-            'desc' => ['max:500', 'required']
+            'desc_en' => ['max:1200', 'required'],
+            'desc_lv' => ['max:1200', 'required']
         ]);
         $query = Product::where('id', $id);
         $query->update([
-            'name' => $request->name,
+            'name_lv' => $request->name_lv,
+            'name_en' => $request->name_en,
             'price' => $request->price,
-            'desc' => $request->desc,
+            'desc_en' => $request->desc_en,
+            'desc_lv' => $request->desc_lv,
             'active' => $request->has('active'),
             'slug' => $request->slug
         ]);

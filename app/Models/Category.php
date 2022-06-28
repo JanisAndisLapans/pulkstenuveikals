@@ -9,7 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'quantity', 'units', 'category_id'];
+    protected $fillable = ['name_lv', 'quantity', 'units', 'category_id', 'name_en'];
     private $constraints = ['category_id' => 'category'];
 
     public function getConstraints()
