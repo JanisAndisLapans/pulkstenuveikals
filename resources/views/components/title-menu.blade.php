@@ -18,7 +18,7 @@
         <a class="py-2 d-none d-md-inline-block" href="/cart">{{__('title.cart')}}</a>
         @can("can_administrate")
             <a style="color:red" class="py-2 d-none d-md-inline-block" href="/admin">Admin</a>
-            <form method="POST" action="\logout">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <input type="submit" style="color:red" class="btn btn-link py-2 d-none d-md-inline-block" value="Iziet"/>
             </form>

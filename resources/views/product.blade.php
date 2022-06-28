@@ -217,7 +217,7 @@
         @elseif(session('verifyStart') == 'failRepeat')
         window.alert("{{("product.already_rated")}}.");
         @elseif(session('verifyStart') == 'ok')
-            window.alert("{{("product.go_to")}} {{session('email')}}{{("product.to_verify")}}");
+            window.alert("{{__("product.go_to")}} {{session('email')}}{{__("product.to_verify")}}");
         @endif
         $('#question').on('input', function() {
             $('.characterCount').text(200-$(this).val().length);

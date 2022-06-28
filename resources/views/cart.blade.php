@@ -82,7 +82,7 @@
                     <input name="zip" id="zip" class="form-control w-75" value = "{{old('zip')}}"/> <br>
                 </form>
                 <div class="text-center fw-bold" style="font-size: 20px">
-                    {{__('cart.payemnt_card')}}
+                    {{__('cart.payment_card')}}
                 </div>
                 <select id="cards">
                     <option value="Visa">Visa</option>

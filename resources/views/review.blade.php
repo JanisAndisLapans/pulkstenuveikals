@@ -24,7 +24,7 @@
             action="{{action([App\Http\Controllers\ReviewController::class, 'review'], [$item->id, $orderId, $code])}}"
         >
             @csrf
-            <input name="rating" id="ratingNum" value="@if(old('rating')!=null) {{old('rating')}} @else 4 @endif" />
+            <input name="rating" id="ratingNum" value="@if(old('rating')!=null) {{old('rating')}} @else 4 @endif" hidden/>
             <hr>
             <textarea name="review" id="review" rows="5" cols="80" class="form-control w-50" maxlength="400">{{old('review')}}</textarea>
             {{__('review.remaining_chars')}}: <span class="characterCount">400</span>

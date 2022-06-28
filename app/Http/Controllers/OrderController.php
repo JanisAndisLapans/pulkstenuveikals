@@ -78,12 +78,6 @@ class OrderController extends Controller
 
 
         if($lang=='lv') {
-            $body = $body . "Kopējā veiktā apmaksa: $totalPrice €";
-            Mail::raw($body, function($message) use ($request) {
-                $message->from('pulkstenu@veikals.lv', 'pulkstenuveikals');
-                $message->to($request->email, 'Cienījamais klients')->subject
-                ('Veiksmīgi veikts pirkums Pulksteņu Veikalā');
-            });
             foreach ($items as $item)
             {
                 $price = $item->price*$itemcounts[$item->id];
@@ -91,13 +85,13 @@ class OrderController extends Controller
                 $totalPrice += $price;
                 $order->products()->attach($item->id, ['count' => $itemcounts[$item->id]]);
             }
-        }else{
-            $body = $body . "Total amount paid: $totalPrice €";
+            $body = $body . "Kopējā veiktā apmaksa: $totalPrice €";
             Mail::raw($body, function($message) use ($request) {
-                $message->from('pulkstenu@veikals.lv', 'Watch Store');
-                $message->to($request->email, 'Valued customer')->subject
-                ('Purchase successful in Watch Store');
+                $message->from('pulkstenu@veikals.lv', 'pulkstenuveikals');
+                $message->to($request->email, 'Cienījamais klients')->subject
+                ('Veiksmīgi veikts pirkums Pulksteņu Veikalā');
             });
+        }else{
             foreach ($items as $item)
             {
                 $price = $item->price*$itemcounts[$item->id];
@@ -105,6 +99,12 @@ class OrderController extends Controller
                 $totalPrice += $price;
                 $order->products()->attach($item->id, ['count' => $itemcounts[$item->id]]);
             }
+            $body = $body . "Total amount paid: $totalPrice €";
+            Mail::raw($body, function($message) use ($request) {
+                $message->from('pulkstenu@veikals.lv', 'Watch Store');
+                $message->to($request->email, 'Valued customer')->subject
+                ('Purchase successful in Watch Store');
+            });
         }
         return redirect("cart/success");
     }

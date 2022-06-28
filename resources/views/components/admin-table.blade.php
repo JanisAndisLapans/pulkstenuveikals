@@ -4,7 +4,7 @@
         @csrf
         <foreach>
             @foreach($headers as $header => $type)
-                @if($type=='nofill' || $type == 'img') @continue @endif
+                @if($type=='nofill' || $type == 'img' || $header=='prop') @continue @endif
                 <labal>{{$header}}: </labal>
                 @if($type == 'boolean')
                     <input value="1" type="checkbox" class="switch-input" name="{{$header}}" id="{{$header}} " {{ old("$header") ? 'checked="checked"' : '' }}/>
